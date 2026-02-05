@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carta Interactiva</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --pink:#f9a8d4;
+    --purple:#c4b5fd;
+    --blue:#bae6fd;
+    --bg1:#fff7fb;
+    --bg2:#f5f3ff;
+    --glass:rgba(255,255,255,.45);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    overflow:hidden;
+}
+
+.container{
+    position:relative;
+    text-align:center;
+    z-index:2;
+}
+
+.card{
+    background:var(--glass);
+    backdrop-filter:blur(14px);
+    border-radius:26px;
+    padding:45px;
+    width:420px;
+    max-width:90%;
+    box-shadow:0 25px 50px rgba(0,0,0,.15);
+    animation:fadeUp .8s ease;
+}
+
+.message{
+    font-size:30px;
+    font-weight:700;
+    color:#ec4899;
+    margin-bottom:35px;
+}
+
+.buttons{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+}
+
+button{
+    padding:14px 34px;
+    font-size:18px;
+    border:none;
+    border-radius:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s ease;
+}
+
+.yes-btn{
+    background:linear-gradient(135deg,var(--pink),#fbcfe8);
+}
+
+.no-btn{
+    background:linear-gradient(135deg,var(--purple),var(--blue));
+}
+
+button:hover{
+    transform:translateY(-4px) scale(1.08);
+}
+
+.hidden{ display:none; }
+
+/* ❤️ Hearts */
+.hearts span{
+    font-size:48px;
+    display:inline-block;
+    animation:heartBeat 1.8s infinite ease-in-out;
+}
+
+.hearts span:nth-child(2){ animation-delay:.2s }
+.hearts span:nth-child(3){ animation-delay:.4s }
+
+/* 💀 NO animation */
+.skull{
+    font-size:80px;
+    animation:shake 1.2s infinite;
+}
+
+/* 🎉 Confetti */
+.confetti{
+    position:absolute;
+    width:10px;
+    height:10px;
+    background:var(--pink);
+    top:-10px;
+    animation:confettiFall linear infinite;
+}
+
+/* 🌧️ Rain */
+.rain{
+    position:absolute;
+    width:2px;
+    height:20px;
+    background:#93c5fd;
+    animation:rainFall linear infinite;
+}
+
+/* Animations */
+@keyframes confettiFall{
+    to{ transform:translateY(110vh) rotate(360deg); }
+}
+
+@keyframes rainFall{
+    to{ transform:translateY(110vh); }
+}
+
+@keyframes heartBeat{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.3); }
+}
+
+@keyframes shake{
+    0%{ transform:rotate(0); }
+    25%{ transform:rotate(-8deg); }
+    50%{ transform:rotate(8deg); }
+    75%{ transform:rotate(-8deg); }
+}
+
+@keyframes fadeUp{
+    from{ opacity:0; transform:translateY(30px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔊 Sounds -->
+<audio id="yesSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+<audio id="noSound" src="https://assets.mixkit.co/active_storage/sfx/944/944-preview.mp3"></audio>
+
+<div class="container">
+
+    <!-- MAIN -->
+    <div id="card" class="card">
+        <div class="message">¿Quieres salir conmigo?</div>
+        <div class="buttons">
+            <button class="yes-btn" onclick="handleYes()">Sí 💖</button>
+            <button class="no-btn" onclick="handleNo()">No 💀</button>
+        </div>
+    </div>
+
+    <!-- YES -->
+    <div id="yesResult" class="hidden">
+        <div class="card">
+            <div class="hearts">
+                <span>❤️</span>
+                <span>💕</span>
+                <span>💖</span>
+            </div>
+            <div style="margin-top:20px;font-size:24px;font-weight:700;color:#ec4899">
+                ¡Sabía que dirías que sí! ✨
+            </div>
+        </div>
+    </div>
+
+    <!-- NO -->
+    <div id="noResult" class="hidden">
+        <div class="card">
+            <div class="skull">💀</div>
+            <div style="margin-top:15px;font-size:22px;font-weight:700;color:#6366f1">
+                Bueno… lo intenté 😅
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function createConfetti(){
+    for(let i=0;i<120;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.animationDuration=(2+Math.random()*3)+"s";
+        c.style.background=`hsl(${Math.random()*360},80%,75%)`;
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),5000);
+    }
+}
+
+function createRain(){
+    for(let i=0;i<120;i++){
+        const r=document.createElement("div");
+        r.className="rain";
+        r.style.left=Math.random()*100+"vw";
+        r.style.animationDuration=(1+Math.random()*2)+"s";
+        document.body.appendChild(r);
+        setTimeout(()=>r.remove(),4000);
+    }
+}
+
+function handleYes(){
+    yesSound.play();
+    card.classList.add("hidden");
+    yesResult.classList.remove("hidden");
+    createConfetti();
+}
+
+function handleNo(){
+    noSound.play();
+    card.classList.add("hidden");
+    noResult.classList.remove("hidden");
+    createRain();
+}
+</script>
+
+</body>
+</html>
